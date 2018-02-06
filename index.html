@@ -6,10 +6,11 @@
 
 <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
 <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular.min.js"></script>
+<script src="cryptowatch.js"></script>
 </head>
 <body>
 
-<div ng-app="cryptowatch" ng-controller="namesCtrl">
+<div ng-app="cryptowatch" ng-controller="coinsCtrl">
 <i class="fa fa-caret-down">
 <input type="text" ng-model="filter_ticker">
 
@@ -61,51 +62,6 @@
 </table>
 
 </div>
-
-<script>
-var app = angular.module('cryptowatch', []);
-app.controller('namesCtrl', function($scope, $http) {
-  $scope.sortType     = 'quantity'; // set the default sort type
-  $scope.sortReverse  = false;  // set the default sort order
-  $scope.coins = [ 
-		{ code : "XRB", quantity : "10", target : "10000" }, 
-		{ code : "XBY", quantity : "100", target : "5000" },
-		{ code : "ETH", quantity : "1", target : "200000" }
-		];
-   $scope.cmcinfos = [];
-   //var hashCoins = {};
-   var codes = "";
-  for (i = 0; i < $scope.coins.length; i++) {
-     var coin = $scope.coins[i]
-     coin.index = i
-     //hashCoins[coin.code] = coin;
-     codes = codes + coin.code + ",";
-  }
-  var data;
-  var url = "https://min-api.cryptocompare.com/data/pricemultifull?fsyms="+codes+"&tsyms=USD";
-  console.log(url);
-     $http.get(url)
-      .then(function(response) {
-        data = response.data;
-	console.log(data);
-	//coin.price = data.USD;
-	for (i = 0; i < $scope.coins.length; i++) {
-		var coin = $scope.coins[i];
-		coin.price = data.RAW[coin.code].USD.PRICE;
-		coin.marketcap = data.RAW[coin.code].USD.MKTCAP;
-		coin.target_price = coin.price * coin.target * 1000000 / coin.marketcap;
-		coin.total_value=coin.price*coin.quantity;
-		coin.target_total_value=coin.target_price*coin.quantity;
-		//hashCoins[coin.code] = coin;
-	}
-    });
-});
-app.filter('millionDollarsFilter', function() {
-    return function(x) {
-        return x/1000000;
-    };
-});
-</script>
 
 </body>
 </html>
