@@ -24,20 +24,32 @@
 angular.module('myApp', []).controller('namesCtrl', function($scope, $http) {
   $scope.coins = [ 
 		{ code : "XRB", quantity : "10", target : "10000" }, 
-		{ code : "XBY", quantity : "100", target : "5000" }
+		{ code : "XBY", quantity : "100", target : "5000" },
+		{ code : "ETH", quantity : "1", target : "5000" }
 		];
    $scope.cmcinfos = [];
+   //var hashCoins = {};
+   var codes = "";
   for (i = 0; i < $scope.coins.length; i++) {
      var coin = $scope.coins[i]
-     coin.index = i;
-     $http.get("https://min-api.cryptocompare.com/data/price?fsym="+coin.code+"&tsyms=USD")
-      .then(function(response) {
-        var data = response.data;
-	coin.price_usd = data.USD;
-    });
-    
+     coin.index = i
+     //hashCoins[coin.code] = coin;
+     codes = codes + coin.code + ",";
   }
-	
+  var data;
+  var url = "https://min-api.cryptocompare.com/data/pricemulti?fsyms="+codes+"&tsyms=USD";
+  console.log(url);
+     $http.get(url)
+      .then(function(response) {
+        data = response.data;
+	console.log(data);
+	//coin.price_usd = data.USD;
+	for (i = 0; i < $scope.coins.length; i++) {
+		var coin = $scope.coins[i];
+		coin.price_usd = data[coin.code].USD;
+		//hashCoins[coin.code] = coin;
+	}
+    });
 });
 </script>
 
