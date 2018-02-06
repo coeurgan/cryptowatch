@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>TESTS JGL</title></head>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular.min.js"></script>
+<body>
+
+<div ng-app="myApp" ng-controller="namesCtrl">
+
+<p>Looping with objects:</p>
+<table>
+<tr ng-repeat="x in coins">
+  <td>{{ x.code}}</td>
+  <td>{{ x.quantity}}</td>
+  <td>{{ x.target}}</td>
+  <td>{{ x.index}}</td>
+  <td>{{ x.price_usd}}</td>
+</tr>
+</table>
+
+</div>
+
+<script>
+angular.module('myApp', []).controller('namesCtrl', function($scope, $http) {
+  $scope.coins = [ 
+		{ code : "XRB", quantity : "10", target : "10000" }, 
+		{ code : "XBY", quantity : "100", target : "5000" }
+		];
+   $scope.cmcinfos = [];
+  for (i = 0; i < $scope.coins.length; i++) {
+     var coin = $scope.coins[i]
+     coin.index = i;
+     $http.get("https://min-api.cryptocompare.com/data/price?fsym="+coin.code+"&tsyms=USD")
+      .then(function(response) {
+        var data = response.data;
+	coin.price_usd = data.USD;
+    });
+    
+  }
+	
+});
+</script>
+
+</body>
+</html>
