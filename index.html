@@ -7,14 +7,32 @@
 
 <div ng-app="myApp" ng-controller="namesCtrl">
 
-<p>Looping with objects:</p>
+<input type="text" ng-model="filter_ticker">
+
 <table>
-<tr ng-repeat="x in coins">
+<tr>
+  <th>
+    <a href="#" ng-click="sortType = 'code'; sortReverse = !sortReverse">
+      Ticker
+    </a>
+  </th>
+  <th>
+      Quantity
+  </th>
+  <th>Target</th>
+  <th align="right">Price</th>
+  <th align="right">
+    <a href="#" ng-click="sortType = 'marketcap_usd'; sortReverse = !sortReverse">
+      Market CAP
+    </a>
+  </th>
+</tr>
+<tr ng-repeat="x in coins | orderBy:sortType:sortReverse | filter:filter_ticker">
   <td>{{ x.code}}</td>
   <td>{{ x.quantity}}</td>
   <td>{{ x.target}}</td>
-  <td>{{ x.index}}</td>
-  <td>{{ x.price_usd}}</td>
+  <td align="right">{{ x.price_usd | currency}}</td>
+  <td align="right">{{ x.marketcap_usd | currency}}</td>
 </tr>
 </table>
 
@@ -22,6 +40,8 @@
 
 <script>
 angular.module('myApp', []).controller('namesCtrl', function($scope, $http) {
+  $scope.sortType     = 'quantity'; // set the default sort type
+  $scope.sortReverse  = false;  // set the default sort order
   $scope.coins = [ 
 		{ code : "XRB", quantity : "10", target : "10000" }, 
 		{ code : "XBY", quantity : "100", target : "5000" },
@@ -37,7 +57,7 @@ angular.module('myApp', []).controller('namesCtrl', function($scope, $http) {
      codes = codes + coin.code + ",";
   }
   var data;
-  var url = "https://min-api.cryptocompare.com/data/pricemulti?fsyms="+codes+"&tsyms=USD";
+  var url = "https://min-api.cryptocompare.com/data/pricemultifull?fsyms="+codes+"&tsyms=USD";
   console.log(url);
      $http.get(url)
       .then(function(response) {
@@ -46,7 +66,8 @@ angular.module('myApp', []).controller('namesCtrl', function($scope, $http) {
 	//coin.price_usd = data.USD;
 	for (i = 0; i < $scope.coins.length; i++) {
 		var coin = $scope.coins[i];
-		coin.price_usd = data[coin.code].USD;
+		coin.price_usd = data.RAW[coin.code].USD.PRICE;
+		coin.marketcap_usd = data.RAW[coin.code].USD.MKTCAP;
 		//hashCoins[coin.code] = coin;
 	}
     });
