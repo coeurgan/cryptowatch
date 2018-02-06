@@ -1,51 +1,76 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>TESTS JGL</title></head>
+<title>TESTS JGL</title>
+
+
+<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
 <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular.min.js"></script>
+</head>
 <body>
 
-<div ng-app="myApp" ng-controller="namesCtrl">
-
+<div ng-app="cryptowatch" ng-controller="namesCtrl">
+<i class="fa fa-caret-down">
 <input type="text" ng-model="filter_ticker">
 
-<table>
+<table  class="w3-table-all w3-hoverable">
 <tr>
   <th>
     <a href="#" ng-click="sortType = 'code'; sortReverse = !sortReverse">
       Ticker
     </a>
+    <span ng-show="sortType == 'code' && !sortReverse" class="arrow down"></span>
+    <i ng-show="sortType == 'code' && !sortReverse" class="fa fa-caret-down"></i>
   </th>
   <th>
       Quantity
   </th>
+  <th align="right">
+    <a href="#" ng-click="sortType = 'total_value'; sortReverse = !sortReverse">
+      Total Value    
+    </a>
+  </th>
   <th>Target</th>
   <th align="right">Price</th>
   <th align="right">
-    <a href="#" ng-click="sortType = 'marketcap_usd'; sortReverse = !sortReverse">
+    <a href="#" ng-click="sortType = 'marketcap'; sortReverse = !sortReverse">
       Market CAP
+    </a>
+  </th>
+  <th align="right">
+    <a href="#" ng-click="sortType = 'target_price'; sortReverse = !sortReverse">
+      Target Price
+    </a>
+  </th>
+  <th align="right">
+    <a href="#" ng-click="sortType = 'target_total_value'; sortReverse = !sortReverse">
+      Target total value
     </a>
   </th>
 </tr>
 <tr ng-repeat="x in coins | orderBy:sortType:sortReverse | filter:filter_ticker">
   <td>{{ x.code}}</td>
   <td>{{ x.quantity}}</td>
-  <td>{{ x.target}}</td>
-  <td align="right">{{ x.price_usd | currency}}</td>
-  <td align="right">{{ x.marketcap_usd | currency}}</td>
+  <td>{{ x.total_value  | currency}}</td>
+  <td>{{ x.target | currency : 'M$' : 0}}</td>
+  <td align="right">{{ x.price | currency}}</td>
+  <td align="right">{{ x.marketcap | millionDollarsFilter | currency : 'M$' : 0}}</td>
+  <td align="right">{{ x.target_price |  currency }}</td>
+  <td align="right">{{ x.target_total_value |  currency }}</td>
 </tr>
 </table>
 
 </div>
 
 <script>
-angular.module('myApp', []).controller('namesCtrl', function($scope, $http) {
+var app = angular.module('cryptowatch', []);
+app.controller('namesCtrl', function($scope, $http) {
   $scope.sortType     = 'quantity'; // set the default sort type
   $scope.sortReverse  = false;  // set the default sort order
   $scope.coins = [ 
 		{ code : "XRB", quantity : "10", target : "10000" }, 
 		{ code : "XBY", quantity : "100", target : "5000" },
-		{ code : "ETH", quantity : "1", target : "5000" }
+		{ code : "ETH", quantity : "1", target : "200000" }
 		];
    $scope.cmcinfos = [];
    //var hashCoins = {};
@@ -63,14 +88,22 @@ angular.module('myApp', []).controller('namesCtrl', function($scope, $http) {
       .then(function(response) {
         data = response.data;
 	console.log(data);
-	//coin.price_usd = data.USD;
+	//coin.price = data.USD;
 	for (i = 0; i < $scope.coins.length; i++) {
 		var coin = $scope.coins[i];
-		coin.price_usd = data.RAW[coin.code].USD.PRICE;
-		coin.marketcap_usd = data.RAW[coin.code].USD.MKTCAP;
+		coin.price = data.RAW[coin.code].USD.PRICE;
+		coin.marketcap = data.RAW[coin.code].USD.MKTCAP;
+		coin.target_price = coin.price * coin.target * 1000000 / coin.marketcap;
+		coin.total_value=coin.price*coin.quantity;
+		coin.target_total_value=coin.target_price*coin.quantity;
 		//hashCoins[coin.code] = coin;
 	}
     });
+});
+app.filter('millionDollarsFilter', function() {
+    return function(x) {
+        return x/1000000;
+    };
 });
 </script>
 
